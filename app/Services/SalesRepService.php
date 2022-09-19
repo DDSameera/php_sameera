@@ -7,12 +7,21 @@ use App\Models\SalesRep;
 class SalesRepService
 {
 
+    /**
+     * Get All Sales Rep data
+     * @return \Illuminate\Database\Eloquent\Builder[]|\Illuminate\Database\Eloquent\Collection
+     */
     public function getAllSalesRep()
     {
         return SalesRep::with('route')->get();
 
     }
 
+    /**
+     * Add Sales Rep data
+     * @param $data
+     * @return mixed
+     */
     public function addSalesRep($data)
     {
         return SalesRep::create([
@@ -26,11 +35,17 @@ class SalesRepService
         ]);
     }
 
+    /**
+     * Update Sales Rep data
+     * @param $data
+     * @param $id
+     * @return bool|int
+     */
     public function updateSalesRep($data, $id)
     {
 
         $saleRep = $this->getSalesRep($id);
-       return $saleRep->update([
+        return $saleRep->update([
             'name' => $data['name'],
             'email' => $data['email'],
             'telephone' => $data['telephone'],
@@ -41,6 +56,11 @@ class SalesRepService
         ]);
     }
 
+    /**
+     * Get Single Rep Data Record by their ID
+     * @param $id
+     * @return \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Eloquent\Model|object|null
+     */
     public function getSalesRep($id)
     {
         return SalesRep::with('route')->where('sales_reps.id', $id)->first();
