@@ -94,6 +94,6 @@ class SalesRepTest extends TestCase
 
         $response = $this->call('PUT', '/salesrep/' . $salesRepId, $salesRepData);
 
-        var_dump($response->getContent());
+        $this->assertEquals(302, $response->getStatusCode());
     }
 }
