@@ -132,7 +132,7 @@ class SalesRepController extends Controller
             'comments' => $request->input('comments')
 
         ]);
-        return redirect()->route('salesrep.edit', $id);
+        return redirect()->route('salesrep.edit', $id)->with('success','Record Updated Successfully');
 
 
     }

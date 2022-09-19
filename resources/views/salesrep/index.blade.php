@@ -1,6 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
+    <div class="row">
+        <div class="container h-100">
+            <div class="d-flex h-100">
+
+                <div class="align-self-end ml-auto">
+                    <a href="{{route('salesrep.create')}}" type="button" class="btn btn-dark">
+                       Add New Record
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="card">
         <h5 class="card-header">Sales Team</h5>
         <div class="card-body">
