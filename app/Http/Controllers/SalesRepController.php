@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Facades\RouteFacade;
+use App\Facades\SalesRepFacade;
 use App\Http\Requests\SalesRepRequest;
-use App\Models\Route;
-use App\Models\SalesRep;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -17,10 +17,10 @@ class SalesRepController extends Controller
      */
     public function index()
     {
-        $salesRep = SalesRep::with('route')->get();
+
 
         $data = [
-            'salesRep' => $salesRep
+            'salesRep' => SalesRepFacade::getAllSalesRep()
         ];
 
         return view('salesrep.index', $data);
@@ -37,15 +37,19 @@ class SalesRepController extends Controller
     {
 
 
-        SalesRep::create([
+        $data = [
             'name' => $request->input('name'),
             'email' => $request->input('email'),
             'telephone' => $request->input('telephone'),
             'route_id' => $request->input('route_id'),
             'joined_date' => $request->input('joined_date'),
             'comments' => $request->input('comments')
+        ];
 
-        ]);
+
+        if (!SalesRepFacade::addSalesRep($data)) {
+            return back()->with('error', 'Something Goes wrong. Record cannot add to the system');
+        }
         return back()->with('success', 'Record created successfully!');
 
     }
@@ -57,7 +61,7 @@ class SalesRepController extends Controller
      */
     public function create()
     {
-        $routes = Route::all();
+        $routes = RouteFacade::getAllRoutes();
 
         $data = [
             'routes' => $routes
@@ -75,8 +79,11 @@ class SalesRepController extends Controller
      */
     public function show($id)
     {
-        $salesRep = SalesRep::with('route')->where('sales_reps.id', $id)->first();
+        $salesRep = SalesRepFacade::getSalesRep($id);
 
+        if (!$salesRep) {
+            return back()->with('error', 'Record not found');
+        }
 
         $data = [
             'salesRep' => $salesRep
@@ -94,13 +101,13 @@ class SalesRepController extends Controller
      */
     public function edit($id)
     {
-        $salesRep = SalesRep::find($id);
+        $salesRep = SalesRepFacade::getSalesRep($id);
         if (!$salesRep) {
             return redirect()->back()->with('error', 'Sorry Sales Rep ID is not exsist');
         }
 
-        $salesRep = SalesRep::with('route')->where('sales_reps.id', $id)->first();
-        $routes = Route::all();
+
+        $routes = RouteFacade::getAllRoutes();
         $data = [
             'routes' => $routes,
             'salesRep' => $salesRep
@@ -117,22 +124,26 @@ class SalesRepController extends Controller
      */
     public function update(SalesRepRequest $request, $id)
     {
-        $salesRep = SalesRep::find($id);
+        $salesRep = SalesRepFacade::getSalesRep($id);
 
         if (!$salesRep) {
             return redirect()->back()->with('error', 'Sorry Sales Rep ID is not exsist');
         }
 
-        $salesRep->update([
+        $data = [
             'name' => $request->input('name'),
             'email' => $request->input('email'),
             'telephone' => $request->input('telephone'),
             'route_id' => $request->input('route_id'),
             'joined_date' => $request->input('joined_date'),
             'comments' => $request->input('comments')
+        ];
+        if (!SalesRepFacade::updateSalesRep($data, $id)) {
+            return redirect()->back()->with('error', 'Sorry. Record is unable to save');
+        }
 
-        ]);
-        return redirect()->route('salesrep.edit', $id)->with('success','Record Updated Successfully');
+
+        return redirect()->route('salesrep.edit', $id)->with('success', 'Record Updated Successfully');
 
 
     }
@@ -145,7 +156,7 @@ class SalesRepController extends Controller
      */
     public function destroy($id)
     {
-        $salesRep = SalesRep::find($id);
+        $salesRep = SalesRepFacade::getSalesRep($id);
         if (!$salesRep) {
             return redirect()->back()->with('error', 'Sorry Sales Rep ID is not exsist');
         }
