@@ -3,10 +3,12 @@
 namespace Tests\Feature;
 
 use App\Models\SalesRep;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class SalesRepTest extends TestCase
 {
+   // use RefreshDatabase;
     /**
      * A basic feature test example.
      *
@@ -24,7 +26,12 @@ class SalesRepTest extends TestCase
 
         $response = $this->get('/');
         $salesRep = SalesRep::first();
-        $response->assertSee($salesRep->name);
+
+        if ($salesRep) {
+            $response->assertSee($salesRep->name);
+        }
+        $response->assertSee(null);
+
 
     }
 
@@ -49,13 +56,15 @@ class SalesRepTest extends TestCase
             'telephone' => '0122121221',
             'joined_date' => '2022-01-01',
             'route_id' => 1,
-            'comments' => 'great'
+            'comments' => 'great',
+            '_token' => csrf_token()
 
         ];
 
-        $this->call('POST', 'salesrep', $salesRepData);
+        $response = $this->post(route('salesrep.store'), $salesRepData);
+        $response->assertStatus(302);
 
-        $salesRep = SalesRep::where('name', 'Abdulla')->first();
+        $salesRep = SalesRep::where('name', $salesRepData["name"])->first();
 
 
         $this->assertEquals($salesRepData["name"], $salesRep->name);
@@ -68,7 +77,7 @@ class SalesRepTest extends TestCase
 
         $salesRep = SalesRep::first();
         $salesRepId = $salesRep->id;
-        $response = $this->call('DELETE', '/salesrep/' . $salesRepId, ['_token' => csrf_token()]);
+        $response = $this->delete(route('salesrep.destroy',$salesRepId) , ['_token' => csrf_token()]);
 
         $this->assertEquals(302, $response->getStatusCode());
 
@@ -77,8 +86,6 @@ class SalesRepTest extends TestCase
 
     public function test_edit_sales_rep_data()
     {
-        $salesRep = SalesRep::first();
-        $salesRepId = $salesRep->id;
 
         $salesRepData = [
             'name' => 'Gotabaya',
@@ -87,12 +94,18 @@ class SalesRepTest extends TestCase
             'joined_date' => '2022-01-01',
             'route_id' => 1,
             'comments' => 'Gota 2022',
-            '_token' => csrf_token()
+
 
         ];
 
+        $response = $this->post(route('salesrep.store'), $salesRepData);
 
-        $response = $this->call('PUT', '/salesrep/' . $salesRepId, $salesRepData);
+        $this->assertEquals(302, $response->status());
+        $salesRep = SalesRep::first();
+        $salesRepId = $salesRep->id;
+
+
+        $response = $this->put(route('salesrep.update', $salesRepId) , $salesRepData);
 
         $this->assertEquals(302, $response->getStatusCode());
     }
